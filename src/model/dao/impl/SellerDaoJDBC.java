@@ -4,11 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import db.DB;
 import db.DbException;
 import model.dao.SellerDao;
@@ -17,7 +17,10 @@ import model.entities.Seller;
 
 public class SellerDaoJDBC implements SellerDao {
 
+    private static final String FIND_BY_ID = "SELECT seller.*, department.Name as DepName FROM seller INNER JOIN department ON seller.departmentId = department.Id WHERE seller.Id = ?";
     private static final String DEPARTMENT_ID = "DepartmentId";
+    private static final String INSERT = "INSERT INTO seller (Name, Email, BirthDate, BaseSalary, DepartmentId) VALUES (?, ?, ?, ?, ?)";
+
     private Connection conn;
 
     public SellerDaoJDBC(Connection conn) {
@@ -26,7 +29,36 @@ public class SellerDaoJDBC implements SellerDao {
 
     @Override
     public void insert(Seller obj) {
-        throw new UnsupportedOperationException("Unimplemented method 'insert'");
+        PreparedStatement st = null;
+
+        try {
+            st = conn.prepareStatement(INSERT, Statement.RETURN_GENERATED_KEYS);
+            st.setString(1, obj.getName());
+            st.setString(2, obj.getEmail());
+            st.setDate(3, new java.sql.Date(obj.getDate().getTime()));
+            st.setDouble(4, obj.getBaseSalary());
+            st.setInt(5, obj.getDepartment().getId());
+
+            int rowsAffected = st.executeUpdate();
+
+            if (rowsAffected > 0) {
+                ResultSet rs = st.getGeneratedKeys();
+                if (rs.next()){
+                    int id = rs.getInt(1);
+                    obj.setId(id);
+                }
+                DB.closeResultSet(rs);
+            } else {
+                throw new DbException("Unexpected error.");
+            }
+
+
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeStatement(st);
+        
+        }
     }
 
     @Override
@@ -44,11 +76,7 @@ public class SellerDaoJDBC implements SellerDao {
         PreparedStatement st = null;
         ResultSet rs = null;
         try{
-            st = conn.prepareStatement(
-                "SELECT seller.*, department.Name as DepName "
-                + "FROM seller INNER JOIN department "
-                + "ON seller.departmentId = department.Id "
-                + "WHERE seller.Id = ?");
+            st = conn.prepareStatement(FIND_BY_ID);
 
             st.setInt(1, id);
 

@@ -17,6 +17,7 @@ import model.entities.Seller;
 
 public class SellerDaoJDBC implements SellerDao {
 
+    private static final String DEPARTMENT_ID = "DepartmentId";
     private Connection conn;
 
     public SellerDaoJDBC(Connection conn) {
@@ -25,19 +26,16 @@ public class SellerDaoJDBC implements SellerDao {
 
     @Override
     public void insert(Seller obj) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'insert'");
     }
 
     @Override
     public void update(Seller obj) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'update'");
     }
 
     @Override
     public void deleteById(Integer id) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'deleteById'");
     }
 
@@ -57,8 +55,8 @@ public class SellerDaoJDBC implements SellerDao {
             rs = st.executeQuery();
             if (rs.next()){
                 Department dep = instanciateDepartment(rs);
-                Seller obj = instanciateSeller(rs, dep);
-            return obj;
+                
+            return instanciateSeller(rs, dep);
             } 
             return null;
         } catch (SQLException e) {
@@ -82,14 +80,13 @@ public class SellerDaoJDBC implements SellerDao {
 
     private Department instanciateDepartment(ResultSet rs) throws SQLException {
             var dep = new Department();
-            dep.setId(rs.getInt("DepartmentId"));
+            dep.setId(rs.getInt(DEPARTMENT_ID));
             dep.setName(rs.getString("DepName"));
         return dep;
     }
 
     @Override
     public List<Seller> findAll() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'findAll'");
     }
 
@@ -114,10 +111,10 @@ public class SellerDaoJDBC implements SellerDao {
 
             while (rs.next()){
 
-                Department dep = map.get(rs.getInt("DepartmentId"));
+                Department dep = map.get(rs.getInt(DEPARTMENT_ID));
                 if (dep == null){
                     dep = instanciateDepartment(rs);
-                    map.put(rs.getInt("DepartmentId"), dep);
+                    map.put(rs.getInt(DEPARTMENT_ID), dep);
                 }
 
                 Seller obj = instanciateSeller(rs, dep);

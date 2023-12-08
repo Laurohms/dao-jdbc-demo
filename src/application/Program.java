@@ -34,6 +34,27 @@ public class Program {
 
         System.out.println("New seller inserted! ID: " + newSeller.getId());
 
+        System.out.println("\n=======Test5: Seller update======= ");
+        seller = sellerDao.findById(1);
+        seller.setName("Lauro Santos");
+        sellerDao.update(seller);
+        sellerDao.findById(1);
+        System.out.println(seller);
+
+        System.out.println("\n=======Test5: Seller update======= ");
+        for (Seller s : listAll) {
+            System.out.println(s);
+        }
+        sellerDao.deleteById(10);
+        for (Seller s : listAll) {
+            System.out.println(s);
+        }
+
+
+
+
+
+
         
     }
 }
